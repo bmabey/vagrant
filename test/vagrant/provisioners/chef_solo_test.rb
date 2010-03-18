@@ -16,6 +16,16 @@ class ChefSoloProvisionerTest < Test::Unit::TestCase
       @action.expects(:share_cookbook_folders).once
       @action.prepare
     end
+
+    should "share the roles folder" do
+      @env.config.chef.provisioning_path = "/provisioning"
+      @env.config.chef.role_path = "/host/roles"
+
+      @env.config.vm.expects(:share_folder).with("vagrant-chef-solo-roles", "/provisioning/roles", "/host/roles")
+      @action.stubs(:share_cookbook_folders)
+      @action.prepare
+    end
+
   end
 
   context "provisioning" do
@@ -87,6 +97,16 @@ class ChefSoloProvisionerTest < Test::Unit::TestCase
     end
   end
 
+  context "roles path" do
+    should "return a single string representation containing the provisioning path" do
+      @env.config.chef.provisioning_path = "/stuff"
+      @env.config.chef.role_path = "/host_roles_dir"
+
+      assert_equal "/stuff/roles".to_json, @action.role_path
+    end
+  end
+
+
   context "generating and uploading chef solo configuration file" do
     setup do
       @env.ssh.stubs(:upload!)
@@ -99,6 +119,13 @@ cookbook_path #{@action.cookbooks_path}
 config
 
       StringIO.expects(:new).with(expected_config).once
+      @action.setup_solo_config
+    end
+
+    should "include the role_path in the generated configuration when provided one in the configuration" do
+      @env.config.chef.role_path = "/host_roles_dir"
+
+      StringIO.expects(:new).with() {|config| config =~ /role_path #{@action.role_path}/ }
       @action.setup_solo_config
     end
 

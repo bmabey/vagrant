@@ -14,6 +14,7 @@ module Vagrant
 
         # Chef solo specific config
         attr_accessor :cookbooks_path
+        attr_accessor :role_path
 
         # Shared config
         attr_accessor :provisioning_path
