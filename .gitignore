@@ -9,4 +9,4 @@ _site/*
 *.org
 .yardoc/
 doc/
-*~
+*.sw?
